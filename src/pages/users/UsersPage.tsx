@@ -37,38 +37,43 @@ export default function UsersPage() {
 
   async function createUser() {
     if (!form.email || !form.password || !form.full_name) { setError('Email, password, and name are required.'); return; }
-    if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setSaving(true);
     setError('');
 
-    // Use a separate client instance to avoid hijacking the admin session
-    const { createClient } = await import('@supabase/supabase-js');
-    const tempClient = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const url = (import.meta.env.VITE_SUPABASE_URL || 'https://hfvhiirrmfpnukynwody.supabase.co') as string;
+      const key = (import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdmhpaXJybWZwbnVreW53b2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxMzIzNDMsImV4cCI6MjEwMDcwODM0M30.PE7u_FC_jL92aRqSkNRJOOb4-nqQjoT9niWsXmCiomI') as string;
+      const tempClient = createClient(url, key, { auth: { persistSession: false } });
 
-    const { data: authData, error: signUpErr } = await tempClient.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: { data: { full_name: form.full_name, phone: form.phone, role: form.role } },
-    });
-
-    if (signUpErr) { setError(signUpErr.message); setSaving(false); return; }
-
-    // If user was created but profile trigger is slightly delayed, update profile directly
-    if (authData.user) {
-      await supabase.from('profiles').upsert({
-        id: authData.user.id,
-        full_name: form.full_name,
-        phone: form.phone,
-        role: form.role,
+      const { data: authData, error: signUpErr } = await tempClient.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: { data: { full_name: form.full_name, phone: form.phone, role: form.role } },
       });
-    }
 
-    setSaving(false);
-    setSuccess(`User "${form.full_name}" created successfully!`);
-    setShowModal(false);
-    setForm({ email: '', password: '', full_name: '', phone: '', role: 'customer' });
-    setTimeout(() => setSuccess(''), 4000);
-    load();
+      if (signUpErr) { setError(signUpErr.message); return; }
+
+      if (authData.user) {
+        await supabase.from('profiles').upsert({
+          id: authData.user.id,
+          full_name: form.full_name,
+          phone: form.phone,
+          role: form.role,
+        });
+      }
+
+      setSuccess(`User "${form.full_name}" created successfully!`);
+      setShowModal(false);
+      setForm({ email: '', password: '', full_name: '', phone: '', role: 'customer' });
+      setTimeout(() => setSuccess(''), 4000);
+      load();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to create user.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function toggleActive(user: Profile) {
