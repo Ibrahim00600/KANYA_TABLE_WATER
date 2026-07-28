@@ -1,0 +1,27 @@
+{
+  "name": "Kanya Table Water",
+  "short_name": "Kanya Water",
+  "description": "Kanya Table Water Management System — Pure. Fresh. Reliable.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0077e6",
+  "theme_color": "#0077e6",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/WhatsApp_Image_2026-07-27_at_1.04.57_PM.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/WhatsApp_Image_2026-07-27_at_1.04.57_PM.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["food", "shopping", "business"],
+  "lang": "en-NG"
+}
