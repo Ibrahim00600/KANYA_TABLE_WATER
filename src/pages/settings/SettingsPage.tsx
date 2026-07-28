@@ -121,32 +121,11 @@ export default function SettingsPage() {
           {/* System Role Access */}
           <div className="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
             <p className="text-sm font-semibold text-gray-900 dark:text-white">Role & Administrative Access</p>
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex-wrap gap-2">
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Current Role: <span className="font-bold text-brand-600 dark:text-brand-400">{ROLE_LABEL[profile?.role ?? 'customer']}</span></p>
-                <p className="text-xs text-gray-400">Upgrade to Super Admin to create staff accounts, manage users, and monitor system operations.</p>
-              </div>
-              {profile?.role !== 'super_admin' && (
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    setSavingProfile(true);
-                    const { error } = await supabase.from('profiles').update({
-                      role: 'super_admin',
-                      updated_at: new Date().toISOString(),
-                    }).eq('id', profile!.id);
-                    setSavingProfile(false);
-                    if (error) { setProfileError(error.message); }
-                    else {
-                      await refreshProfile();
-                      setProfileSuccess('Your account is now upgraded to Super Admin! Refresh or select Users from the menu.');
-                    }
-                  }}
-                  loading={savingProfile}
-                >
-                  Set as Super Admin
-                </Button>
-              )}
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Current Role: <span className="font-bold text-brand-600 dark:text-brand-400">{ROLE_LABEL[profile?.role ?? 'customer']}</span>
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">Account roles and permissions are managed by system Super Admins.</p>
             </div>
           </div>
 

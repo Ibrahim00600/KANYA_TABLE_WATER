@@ -40,19 +40,30 @@ export default function LandingPage({ onLogin }: SplashPageProps) {
           Sign In to Dashboard
         </button>
 
-        <p className="mt-4 text-white/50 text-xs">Pure. Fresh. Reliable.</p>
+        {/* Slogan Badge */}
+        <div className="mt-6 px-6 py-2 bg-gradient-to-r from-blue-600/50 via-cyan-500/50 to-blue-600/50 border border-cyan-300/40 backdrop-blur-md rounded-full shadow-lg">
+          <p className="text-cyan-200 font-display font-extrabold text-base tracking-widest uppercase drop-shadow">
+            Pure. Fresh. Reliable.
+          </p>
+        </div>
 
-        {/* Contact info */}
-        <div className="mt-6 text-white/60 text-xs space-y-1">
-          <p>Light Gold Phase 4, Abuja, FCT — Nigeria</p>
-          <p>Kanyatablewater3@gmail.com</p>
-          <p>+234 902 043 4132 &nbsp;|&nbsp; +234 814 448 3266</p>
+        {/* Contact info card */}
+        <div className="mt-6 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl space-y-1.5 text-center">
+          <p className="text-white font-bold text-sm tracking-wide">
+            Light Gold Phase 4, Abuja, FCT — Nigeria
+          </p>
+          <p className="text-yellow-300 font-extrabold text-sm tracking-wider">
+            Kanyatablewater3@gmail.com
+          </p>
+          <p className="text-cyan-200 font-black text-sm tracking-widest">
+            +234 902 043 4132 <span className="text-white/60 mx-1">|</span> +234 814 448 3266
+          </p>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="absolute bottom-0 inset-x-0 py-4 text-center">
-        <p className="text-white/40 text-xs">
+      <div className="absolute bottom-0 inset-x-0 py-3 bg-black/50 backdrop-blur-sm text-center border-t border-white/10">
+        <p className="text-white/90 font-bold text-xs tracking-wider">
           &copy; {new Date().getFullYear()} Kanya Table Water Management System
         </p>
       </div>
