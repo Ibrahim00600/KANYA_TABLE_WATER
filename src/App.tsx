@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from 'react';
+import { Suspense, lazy, useState, Component, type ReactNode } from 'react';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
@@ -114,16 +114,45 @@ function AppEntry() {
   return <LandingPage onLogin={() => setShowAuth(true)} />;
 }
 
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("App Error Boundary:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 p-6 text-center">
+          <h2 className="font-display font-bold text-2xl text-gray-900 dark:text-white mb-2">Something went wrong</h2>
+          <p className="text-gray-500 text-sm mb-4 max-w-md">{this.state.error?.message || 'An unexpected error occurred.'}</p>
+          <button onClick={() => window.location.reload()} className="px-6 py-2 bg-brand-600 text-white rounded-lg font-medium text-sm">
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Suspense fallback={<FullPageLoader />}>
-            <AppRouter />
-          </Suspense>
-        </CartProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Suspense fallback={<FullPageLoader />}>
+              <AppRouter />
+            </Suspense>
+          </CartProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
