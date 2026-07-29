@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Truck, Users, BarChart3,
   MessageSquare, Settings, LogOut, Menu, X, Bell, Moon, Sun,
   Droplets, ClipboardList, Warehouse, BoxIcon, DollarSign,
-  CreditCard, Send, Activity, ChevronDown
+  CreditCard, Send, Activity, ChevronDown, Upload
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -38,6 +38,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   });
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [pendingRequests, setPendingRequests] = useState(0);
+
+  // Quick upload modal (for manager + delivery)
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadNote, setUploadNote] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState('');
+
+  async function handleQuickUpload() {
+    if (!uploadFile) return;
+    setUploading(true);
+    try {
+      await supabase.from('messages').insert({
+        sender_id: profile?.id ?? null,
+        recipient_id: null,
+        is_broadcast: true,
+        subject: `📎 File Upload: ${uploadFile.name}`,
+        body: uploadNote || `Uploaded by ${profile?.full_name ?? 'Staff'}: ${uploadFile.name} (${(uploadFile.size / 1024).toFixed(1)} KB)`,
+      });
+      setUploadMsg('Record uploaded successfully!');
+      setUploadFile(null);
+      setUploadNote('');
+      setTimeout(() => { setUploadMsg(''); setShowUpload(false); }, 2000);
+    } catch (err: any) {
+      setUploadMsg('Upload failed: ' + (err?.message || 'Unknown error'));
+    } finally { setUploading(false); }
+  }
 
   useEffect(() => {
     if (!profile) return;
@@ -73,10 +100,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { label: 'Staff Cash', view: 'staff-cash', icon: <DollarSign className="w-4 h-4" />, roles: ['super_admin','manager'], group: 'Manager' },
     { label: 'Operator Requests', view: 'op-requests', icon: <Send className="w-4 h-4" />, roles: ['super_admin','manager'], badge: pendingRequests || undefined, group: 'Manager' },
     // Operator specific
-    { label: 'My Production', view: 'op-dashboard', icon: <ClipboardList className="w-4 h-4" />, roles: ['sales_officer'] },
+    { label: 'My Production', view: 'op-dashboard', icon: <ClipboardList className="w-4 h-4" />, roles: ['sales_officer', 'operator'] },
     // Shared comms
-    { label: 'Messages', view: 'messages', icon: <MessageSquare className="w-4 h-4" />, roles: ['super_admin','manager','sales_officer','delivery'], badge: unreadMessages || undefined },
-    { label: 'Settings', view: 'settings', icon: <Settings className="w-4 h-4" />, roles: ['super_admin','manager','sales_officer','delivery','customer'] },
+    { label: 'Messages', view: 'messages', icon: <MessageSquare className="w-4 h-4" />, roles: ['super_admin','manager','sales_officer','delivery','operator'], badge: unreadMessages || undefined },
+    { label: 'Settings', view: 'settings', icon: <Settings className="w-4 h-4" />, roles: ['super_admin','manager','sales_officer','delivery','operator','customer'] },
   ];
 
   const visibleNav = navItems.filter(n => n.roles.includes(role));
@@ -195,6 +222,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <button onClick={toggleTheme} className="btn-ghost rounded-lg p-2">
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
+          {/* Upload Record button for manager + delivery */}
+          {(role === 'manager' || role === 'delivery' || role === 'super_admin') && (
+            <button
+              onClick={() => { setShowUpload(true); setUploadMsg(''); setUploadFile(null); }}
+              className="btn-ghost rounded-lg p-2 text-brand-500 hover:text-brand-600"
+              title="Upload Record"
+            >
+              <Upload className="w-4 h-4" />
+            </button>
+          )}
           <button className="btn-ghost rounded-lg p-2 relative" onClick={() => setView('messages')}>
             <Bell className="w-4 h-4" />
             {(unreadMessages + pendingRequests) > 0 && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />}
@@ -214,6 +251,54 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </main>
       </div>
+
+      {/* Quick Upload Modal */}
+      {showUpload && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowUpload(false)} />
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display font-bold text-lg text-gray-900 dark:text-white">📂 Upload Record</h2>
+              <button onClick={() => setShowUpload(false)} className="btn-ghost rounded-lg p-1.5"><X className="w-4 h-4" /></button>
+            </div>
+            {uploadMsg && (
+              <div className={`text-sm px-3 py-2 rounded-lg ${uploadMsg.includes('fail') || uploadMsg.includes('error') ? 'bg-red-50 text-red-600 dark:bg-red-900/20' : 'bg-green-50 text-green-700 dark:bg-green-900/20'}`}>
+                {uploadMsg}
+              </div>
+            )}
+            <p className="text-xs text-gray-400">Upload a photo, scan, or document of manually recorded book data</p>
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-brand-300 dark:border-brand-700 rounded-2xl p-6 cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
+              <input type="file" accept="image/*,application/pdf,.xlsx,.xls,.csv" capture="environment" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) setUploadFile(f); }} />
+              <Upload className="w-8 h-8 text-brand-400 mb-2" />
+              {uploadFile ? (
+                <p className="text-sm font-semibold text-brand-600 dark:text-brand-400">{uploadFile.name}</p>
+              ) : (
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Tap to take photo or browse</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Image, PDF, Excel supported</p>
+                </div>
+              )}
+            </label>
+            <textarea
+              rows={2}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+              placeholder="Note (optional): e.g. July delivery records..."
+              value={uploadNote}
+              onChange={e => setUploadNote(e.target.value)}
+            />
+            <div className="flex gap-3">
+              <button onClick={() => setShowUpload(false)} className="flex-1 btn btn-secondary btn-md">Cancel</button>
+              <button
+                onClick={handleQuickUpload}
+                disabled={!uploadFile || uploading}
+                className="flex-1 btn btn-primary btn-md flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {uploading ? 'Uploading...' : (<><Upload className="w-4 h-4" /> Upload</>)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
