@@ -75,7 +75,11 @@ export default function UsersPage() {
       });
       if (signUpErr) { setError(signUpErr.message); return; }
       if (authData.user) {
-        await supabase.from('profiles').upsert({ id: authData.user.id, full_name: form.full_name, phone: form.phone, role: form.role });
+        const { error: upsertErr } = await supabase.from('profiles').upsert({ id: authData.user.id, full_name: form.full_name, phone: form.phone, role: form.role });
+        if (upsertErr) {
+          setError('Auth created but profile failed: ' + upsertErr.message);
+          return;
+        }
       }
       setSuccess(`User "${form.full_name}" created successfully!`);
       setShowCreate(false);
@@ -166,7 +170,8 @@ export default function UsersPage() {
   }
 
   const filtered = users.filter(u => {
-    const matchSearch = !search || u.full_name.toLowerCase().includes(search.toLowerCase());
+    const name = u.full_name || '';
+    const matchSearch = !search || name.toLowerCase().includes(search.toLowerCase());
     const matchRole = !roleFilter || u.role === roleFilter;
     return matchSearch && matchRole;
   });
