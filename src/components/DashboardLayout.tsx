@@ -100,10 +100,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { label: 'Staff Cash', view: 'staff-cash', icon: <DollarSign className="w-4 h-4" />, roles: ['super_admin','manager'], group: 'Manager' },
     { label: 'Operator Requests', view: 'op-requests', icon: <Send className="w-4 h-4" />, roles: ['super_admin','manager'], badge: pendingRequests || undefined, group: 'Manager' },
     // Operator specific
-    { label: 'My Production', view: 'op-dashboard', icon: <ClipboardList className="w-4 h-4" />, roles: ['sales_officer', 'operator'] },
+    { label: 'My Production', view: 'op-dashboard', icon: <ClipboardList className="w-4 h-4" />, roles: ['sales_officer'] },
     // Shared comms
-    { label: 'Messages', view: 'messages', icon: <MessageSquare className="w-4 h-4" />, roles: ['super_admin','manager','sales_officer','delivery','operator'], badge: unreadMessages || undefined },
-    { label: 'Settings', view: 'settings', icon: <Settings className="w-4 h-4" />, roles: ['super_admin','manager','sales_officer','delivery','operator','customer'] },
+    { label: 'Messages', view: 'messages', icon: <MessageSquare className="w-4 h-4" />, roles: ['super_admin','manager','sales_officer','delivery'], badge: unreadMessages || undefined },
+    { label: 'Settings', view: 'settings', icon: <Settings className="w-4 h-4" />, roles: ['super_admin','manager','sales_officer','delivery','customer'] },
   ];
 
   const visibleNav = navItems.filter(n => n.roles.includes(role));

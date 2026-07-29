@@ -8,9 +8,8 @@ import { formatDate, formatDateTime, ROLE_LABEL, ROLE_COLOR } from '@/lib/utils'
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: 'super_admin', label: 'Super Admin' },
   { value: 'manager', label: 'Manager' },
-  { value: 'sales_officer', label: 'Sales Officer' },
+  { value: 'sales_officer', label: 'Operator / Sales' },
   { value: 'delivery', label: 'Delivery Driver' },
-  { value: 'operator', label: 'Operator' },
   { value: 'customer', label: 'Customer' },
 ];
 

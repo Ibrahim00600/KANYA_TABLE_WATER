@@ -26,7 +26,7 @@ export default function MessagesPage() {
     setLoading(true);
     let query = supabase
       .from('messages')
-      .select(`*, sender:profiles!messages_sender_id_fkey(full_name, role), recipient:profiles!messages_recipient_id_fkey(full_name)`)
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (tab === 'inbox') {
@@ -133,7 +133,7 @@ export default function MessagesPage() {
         <div className="space-y-2">
           {messages.map(msg => {
             const isUnread = !msg.is_read && msg.recipient_id === profile?.id;
-            const sender = msg.sender as Profile;
+            const sender = staff.find(s => s.id === msg.sender_id);
             return (
               <div
                 key={msg.id}
@@ -179,9 +179,9 @@ export default function MessagesPage() {
         {viewMsg && (
           <div className="space-y-4">
             <div className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-800">
-              <AvatarCircle name={(viewMsg.sender as Profile)?.full_name || 'System'} size="sm" />
+              <AvatarCircle name={staff.find(s => s.id === viewMsg.sender_id)?.full_name || 'System'} size="sm" />
               <div>
-                <p className="font-semibold text-sm text-gray-900 dark:text-white">{(viewMsg.sender as Profile)?.full_name ?? 'Unknown'}</p>
+                <p className="font-semibold text-sm text-gray-900 dark:text-white">{staff.find(s => s.id === viewMsg.sender_id)?.full_name ?? 'Unknown'}</p>
                 <p className="text-xs text-gray-400">{formatDateTime(viewMsg.created_at)}</p>
               </div>
               {viewMsg.is_broadcast && <Badge className="bg-purple-100 text-purple-700 ml-auto">Broadcast</Badge>}

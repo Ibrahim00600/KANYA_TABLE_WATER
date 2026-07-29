@@ -71,18 +71,16 @@ export const PAYMENT_STATUS_COLOR: Record<PaymentStatus, string> = {
 export const ROLE_LABEL: Record<UserRole, string> = {
   super_admin: 'Super Admin',
   manager: 'Manager',
-  sales_officer: 'Sales Officer',
+  sales_officer: 'Operator / Sales',
   delivery: 'Delivery Driver',
-  operator: 'Operator',
   customer: 'Customer',
 };
 
 export const ROLE_COLOR: Record<UserRole, string> = {
   super_admin: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   manager: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  sales_officer: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  sales_officer: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   delivery: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  operator: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   customer: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
 };
 

@@ -32,11 +32,13 @@ export default function OperatorRequestsPage() {
   const [saving, setSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState('pending');
 
+  const [staff, setStaff] = useState<{ id: string; full_name: string }[]>([]);
+
   const load = useCallback(async () => {
     setLoading(true);
     let query = supabase
       .from('operator_requests')
-      .select(`*, operator:profiles!operator_requests_operator_id_fkey(full_name)`)
+      .select('*')
       .order('created_at', { ascending: false });
     if (statusFilter) query = query.eq('status', statusFilter);
     const { data } = await query;
@@ -45,6 +47,10 @@ export default function OperatorRequestsPage() {
   }, [statusFilter]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    supabase.from('profiles').select('id, full_name').then(({ data }) => setStaff(data ?? []));
+  }, []);
 
   async function reviewRequest(status: 'approved' | 'rejected') {
     if (!selected) return;
@@ -93,7 +99,7 @@ export default function OperatorRequestsPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-gray-900 dark:text-white">{r.operator?.full_name ?? 'Unknown'}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{staff.find(s => s.id === r.operator_id)?.full_name ?? 'Unknown'}</span>
                     <Badge className="bg-gray-100 text-gray-600 text-xs capitalize">{r.request_type}</Badge>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{r.description}</p>
@@ -111,7 +117,7 @@ export default function OperatorRequestsPage() {
         {selected && (
           <div className="space-y-4">
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-sm space-y-2">
-              <div className="flex justify-between"><span className="text-gray-500">From:</span><span className="font-medium">{selected.operator?.full_name}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">From:</span><span className="font-medium">{staff.find(s => s.id === selected.operator_id)?.full_name ?? 'Unknown'}</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Type:</span><span className="capitalize">{selected.request_type}</span></div>
               {selected.amount_or_qty && <div className="flex justify-between"><span className="text-gray-500">Amount/Qty:</span><span className="font-semibold">{selected.amount_or_qty}</span></div>}
               <div>
